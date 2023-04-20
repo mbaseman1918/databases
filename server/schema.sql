@@ -2,11 +2,6 @@ CREATE DATABASE chat;
 
 USE chat;
 
-CREATE TABLE rooms (
-  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  roomname TEXT
-);
-
 CREATE TABLE users (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   username TEXT
@@ -15,11 +10,9 @@ CREATE TABLE users (
 CREATE TABLE messages (
   /* Describe your table here.*/
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  message_text TEXT,
-  roomname INT,
+  messageText TEXT,
+  roomname TEXT,
   username INT,
-  FOREIGN KEY (roomname)
-    REFERENCES rooms(id),
   FOREIGN KEY (username)
     REFERENCES users(id)
 );

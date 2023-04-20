@@ -16,12 +16,16 @@ describe('Persistent Node Chat Server', () => {
   beforeAll((done) => {
     dbConnection.connect();
 
-       const tablename = ''; // TODO: fill this out
+    const tablename = 'messages'; // TODO: fill this out
+    const tablename2 = 'users';
 
     /* Empty the db table before all tests so that multiple tests
      * (or repeated runs of the tests)  will not fail when they should be passing
      * or vice versa */
-    dbConnection.query(`truncate ${tablename}`, done);
+    dbConnection.query(`truncate ${tablename2}`, () => {
+      dbConnection.query(`truncate ${tablename}`, done);
+    });
+
   }, 6500);
 
   afterAll(() => {
@@ -36,7 +40,7 @@ describe('Persistent Node Chat Server', () => {
     axios.post(`${API_URL}/users`, { username })
       .then(() => {
         // Post a message to the node chat server:
-        return axios.post(`${API_URL}/messages`, { username, message, roomname });
+        return axios.post(`${API_URL}/messages`, { message, roomname, username });
       })
       .then(() => {
         // Now if we look in the database, we should find the posted message there.
@@ -54,7 +58,7 @@ describe('Persistent Node Chat Server', () => {
           expect(results.length).toEqual(1);
 
           // TODO: If you don't have a column named text, change this test.
-          expect(results[0].text).toEqual(message);
+          expect(results[0].messageText).toEqual(message);
           done();
         });
       })
@@ -65,8 +69,10 @@ describe('Persistent Node Chat Server', () => {
 
   it('Should output all messages from the DB', (done) => {
     // Let's insert a message into the db
-       const queryString = '';
-       const queryArgs = [];
+    var message = 'Gotrek Gurnisson is a Slayer';
+    var roomname = 'Warhammer';
+    const queryString = 'INSERT INTO messages (messageText, username, roomname) VALUES (?, ?, ?)';
+    const queryArgs = [message, 1, roomname];
     /* TODO: The exact query string and query args to use here
      * depend on the schema you design, so I'll leave them up to you. */
     dbConnection.query(queryString, queryArgs, (err) => {
@@ -78,7 +84,7 @@ describe('Persistent Node Chat Server', () => {
       axios.get(`${API_URL}/messages`)
         .then((response) => {
           const messageLog = response.data;
-          expect(messageLog[0].text).toEqual(message);
+          expect(messageLog[0].messageText).toEqual(message);
           expect(messageLog[0].roomname).toEqual(roomname);
           done();
         })
